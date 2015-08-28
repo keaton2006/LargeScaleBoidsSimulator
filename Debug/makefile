@@ -41,19 +41,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: LargeBoidsSimulator
+all: LargeScaleBoidsSimulator
 
 # Tool invocations
-LargeBoidsSimulator: $(OBJS) $(USER_OBJS)
+LargeScaleBoidsSimulator: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: NVCC Linker'
-	/usr/local/cuda-6.5/bin/nvcc --cudart static --relocatable-device-code=false -gencode arch=compute_30,code=compute_30 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -link -o  "LargeBoidsSimulator" $(OBJS) $(USER_OBJS) $(LIBS)
+	/usr/local/cuda-6.5/bin/nvcc --cudart static --relocatable-device-code=false -gencode arch=compute_30,code=compute_30 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -link -o  "LargeScaleBoidsSimulator" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CU_DEPS)$(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) LargeBoidsSimulator
+	-$(RM) $(CU_DEPS)$(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) LargeScaleBoidsSimulator
 	-@echo ' '
 
 .PHONY: all clean dependents
