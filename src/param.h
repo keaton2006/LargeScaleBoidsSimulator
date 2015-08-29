@@ -32,6 +32,7 @@ const unsigned int mesh_height   = 4;
 #define W_NEIGHBOUR_SPEED 0.012
 #define W_NEIGHBOUR_DISTANCE 0.05//0.01//0.0015//0.15
 #define W_MIN_DISTANCE 0.007//*MINDISTANCE
+#define NOISE 0
 #define W_NOISE 0.0
 #define MIN_SPEED 0.0045
 #define MAX_SPEED 0.0047

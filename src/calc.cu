@@ -276,40 +276,49 @@ __global__ void calc_core(Paramstruct* param,float4 *original_position ,float3 *
 #endif
 
 							        float k2 = ((p.x-position.x)*velocity.x + (p.y-position.y)*velocity.y + (p.z-position.z)*velocity.z)/sqrt((p.x-position.x)*(p.x-position.x)+(p.y-position.y)*(p.y-position.y)+(p.z-position.z)*(p.z-position.z))/sqrt(velocity.x*velocity.x+velocity.y*velocity.y+velocity.z*velocity.z);
-							        if(k2 > get_param.sight_angle_cohesion){
+							        if(k2 > get_param.max_angle){ //when tmp_index = index: k2 = nan that's why no problem
 
-									float dx = abs(position.x - p.x);
-									if (dx < get_param.max_distance){
-										float dy = abs(position.y - p.y);
-										if (dy < get_param.max_distance){
-											float dz = abs(position.z - p.z);
-											if (dz < get_param.max_distance){
+										float dx = abs(position.x - p.x);
+										if (dx < get_param.max_distance){
+											float dy = abs(position.y - p.y);
+											if (dy < get_param.max_distance){
+												float dz = abs(position.z - p.z);
+												if (dz < get_param.max_distance){
 
-												d = sqrt(dx*dx + dy*dy + dz*dz);
+													d = sqrt(dx*dx + dy*dy + dz*dz);
+													if (d < get_param.max_distance){
 
-												if(d < get_param.sight_distance_alignment && k2 > get_param.sight_angle_alignment){
-													neighboursCount_ave++;
-													neighboursAvgSpeed = neighboursAvgSpeed + make_double3(original_speed[tmp_index].x,original_speed[tmp_index].y,original_speed[tmp_index].z);
-												}
-
-												if (d < get_param.max_distance){
-													if(d>0){
-														neighboursCount++;
-														neighboursAvgPosition = neighboursAvgPosition + make_double4(p.x,p.y,p.z,p.w);
-
-
-														if (d < get_param.min_distance && k2 > get_param.sight_angle_separation) {
-
-															separationForce = separationForce + ((position - p))/d;
-
+														//alignment
+														if(d < get_param.sight_distance_alignment && k2 > get_param.sight_angle_alignment){
+															neighboursCount_ave++;
+															neighboursAvgSpeed = neighboursAvgSpeed + make_double3(original_speed[tmp_index].x,original_speed[tmp_index].y,original_speed[tmp_index].z);
 														}
+
+														//cohesion
+														if (d < get_param.sight_distance_cohesion && k2 > get_param.sight_angle_cohesion){
+															if(d>0){
+																neighboursCount++;
+																neighboursAvgPosition = neighboursAvgPosition + make_double4(p.x,p.y,p.z,p.w);
+															}else{
+																printf("position of two particles are completely matched, there are probability of bug existing.\n");
+															}
+														}
+
+														//separation
+														if (d < get_param.min_distance && k2 > get_param.sight_angle_separation) {
+															if(d>0){
+																separationForce = separationForce + ((position - p))/d;
+															}else{
+																printf("position of two particles are completely matched, there are probability of bug existing.\n");
+															}
+														}
+
+
 													}
 												}
-
 											}
 										}
-									}
-									count += 1;
+										count += 1;
 							        }
 									tmp_index = coord_particle[tmp_index];
 									if(tmp_index==-1){
@@ -462,7 +471,7 @@ __global__ void prepare_calc(Paramstruct* param,float4 *original_position, unsig
 	curand_init(width, index, 0, &s);
 	original_position[index] = make_float4(INIT_BOIDS_SIZE*(2*(curand_uniform(&s)-0.5)), INIT_BOIDS_SIZE*(2*(curand_uniform(&s)-0.5)), INIT_BOIDS_SIZE*(2*(curand_uniform(&s)-0.5)),1.0f);//1*random(index), 1.0f);
 
-	original_speed[index] = make_float3(2*(curand_uniform(&s)-0.5),2*(curand_uniform(&s)-0.5),2*(curand_uniform(&s)-0.5));
+	original_speed[index] = make_float3(0.05*2*(curand_uniform(&s)-0.5),0.05*2*(curand_uniform(&s)-0.5),0.05*2*(curand_uniform(&s)-0.5));
 }
 
 	//fill -1 in lattice array
