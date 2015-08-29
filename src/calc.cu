@@ -504,7 +504,7 @@ __global__ void divide_space(float4 *original_position, unsigned int width, unsi
 				coord_particle[index] = tmp_index;
 				ok_flag = 1;
 			}else{
-				//printf(" ERROR ");
+				printf(" ERROR ");
 			}
 		}
 	}
