@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-LargeScaleBoidsSimulator
-=======
 # LargeScaleBoidsSimulator  
 本プログラムは，Reynoldsのボイドモデルの処理速度を,GPUによる並列処理で高速化したものです.  
 具体的な仕様は以下のようになります.  
@@ -16,4 +13,3 @@ LargeScaleBoidsSimulator
 　描画処理を記述します.  
 4.param.h  
 　パラメータを指定します.  
->>>>>>> origin/master
