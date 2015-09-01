@@ -504,7 +504,7 @@ __global__ void divide_space(float4 *original_position, unsigned int width, unsi
 				coord_particle[index] = tmp_index;
 				ok_flag = 1;
 			}else{
-				printf(" ERROR ");
+				//printf(" ERROR\n ");
 			}
 		}
 	}
@@ -546,7 +546,7 @@ void setparam(){
 	}else{
 		param_host->max_distance = SIGHT_DISTANCE_ALIGNMENT;
 	}
-	printf("max_distance=%f\n",param_host->max_distance);
+	//printf("max_distance=%f\n",param_host->max_distance);
 	param_host->sight_distance_cohesion = SIGHT_DISTANCE_COHESION;
 	param_host->sight_distance_alignment = SIGHT_DISTANCE_ALIGNMENT;
 	param_host->min_distance = MIN_DISTANCE;
@@ -558,7 +558,7 @@ void setparam(){
 	}else{
 		param_host->max_angle = SIGHT_ANGLE_SEPARATION;
 	}
-	printf("max_dangle=%f\n",param_host->max_angle);
+	//printf("max_dangle=%f\n",param_host->max_angle);
 	param_host->sight_angle_separation = SIGHT_ANGLE_SEPARATION;
 	param_host->sight_angle_alignment = SIGHT_ANGLE_ALIGNMENT;
 	param_host->sight_angle_cohesion = SIGHT_ANGLE_COHESION;
@@ -630,7 +630,7 @@ bool malloc_val(int argc, char **argv, char *ref_file)
 	cudaError_t result;
 	result = cudaStreamCreate(&stream1);
 	result = cudaStreamCreate(&stream0);
-	printf("error=%d\n",result);
+	//printf("error=%d\n",result);
 
 	return true;
 }
@@ -662,6 +662,8 @@ void* routine( void *pvoidData ){
 
 	FILE* save_fp;
 
+#if SEARCH == 0
+
 	int n = 0; //dummy variable to erase the "unreachable" warning
     while(n != EOF){
 
@@ -689,6 +691,63 @@ void* routine( void *pvoidData ){
 
     	data_for_calc->time += 1;
     }
+
+
+#elif SEARCH == 1
+
+	for(int count_param1=-5;count_param1<6;count_param1++){
+		printf("count_param1=%d\n",count_param1);
+	for(int count_param2=-5;count_param2<6;count_param2++){
+		setparam();
+		preparefunc();
+		data_for_calc->time = 0;
+		param_host->sight_distance_cohesion = SIGHT_DISTANCE_COHESION + 0.01*count_param1;
+		param_host->sight_distance_alignment = SIGHT_DISTANCE_ALIGNMENT + 0.01*count_param2;
+		if(param_host->sight_distance_cohesion >= param_host->sight_distance_alignment){
+			param_host->max_distance = param_host->sight_distance_cohesion;//distance_cohesion
+		}else{
+			param_host->max_distance = param_host->sight_distance_alignment;
+		}
+		checkCudaErrors(cudaMemcpy(param_device, param_host, sizeof(Paramstruct), cudaMemcpyHostToDevice));
+	while(data_for_calc->time <= 5100){
+    	/*if(data_for_calc->time == 7000){
+    		param_host->w_noise = 0.1;
+    		checkCudaErrors(cudaMemcpy(param_device, param_host, sizeof(Paramstruct), cudaMemcpyHostToDevice));
+    	}else if(data_for_calc->time == 7005){
+    		param_host->w_noise = W_NOISE;
+    		checkCudaErrors(cudaMemcpy(param_device, param_host, sizeof(Paramstruct), cudaMemcpyHostToDevice));
+    	}*/
+
+    	run();
+
+    	if(data_for_calc->time%5000<=100 & data_for_calc->time > 100){
+    		if(data_for_calc->time%5000==0){
+    			char file_name[100] = "param0_";
+
+    			sprintf(file_name,"search_param_fow%d_%ld.csv",(count_param1+5)*11+(count_param2+5),data_for_calc->time);
+
+    			save_fp = fopen(file_name,"w");
+    		}
+
+    		fprintf(save_fp,"%ld",data_for_calc->time);
+    		for(int count=0;count<N;count++){
+    			fprintf(save_fp,",%f,%f,%f",data_for_calc->a[count].x,data_for_calc->a[count].y,data_for_calc->a[count].z);
+    			fprintf(save_fp,",%f,%f,%f",data_for_calc->b[count].x,data_for_calc->b[count].y,data_for_calc->b[count].z);
+    		}
+    		fprintf(save_fp,"\n");
+    	if(data_for_calc->time%5000==100 & data_for_calc->time > 100){
+    		fclose(save_fp);
+    	}
+    	}
+
+    	data_for_calc->time += 1;
+    	//printf("time=%ld\n",data_for_calc->time);
+    }
+	}
+	}
+#endif
+
+
     cudaStreamDestroy( stream0 );
     cudaStreamDestroy( stream1 );
 
