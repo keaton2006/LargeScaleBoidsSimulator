@@ -8,6 +8,7 @@
 #define PARAM_H_
 
 #define DEBUG 0
+#define SEARCH 0
 #define FRONT 1
 #define DRAW_CUDA 1  //0:no  1:draw by cuda  2:drawing controlled by cpu
 
